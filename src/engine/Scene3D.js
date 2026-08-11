@@ -335,42 +335,65 @@ export class Scene3D {
     this.ghostShadowMesh.visible = false;
     this.scene.add(this.ghostShadowMesh);
 
-    // 6. DETAILED 3D SURVEILLANCE CAMERA MODEL
+    // 6. SLEEK WHITE SIMPLE CCTV SECURITY CAMERA MODEL
     this.cameraGroup = new THREE.Group();
     this.cameraGroup.position.set(1.85, 2.5, 2.0);
 
-    const baseGeo = new THREE.BoxGeometry(0.08, 0.2, 0.2);
-    const metalMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.2 });
-    const baseMesh = new THREE.Mesh(baseGeo, metalMat);
-    this.cameraGroup.add(baseMesh);
+    // Sleek White Wall Mount Plate
+    const plateGeo = new THREE.BoxGeometry(0.05, 0.22, 0.22);
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.3 });
+    const plateMesh = new THREE.Mesh(plateGeo, whiteMat);
+    this.cameraGroup.add(plateMesh);
 
-    const armGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.25, 12);
-    const armMesh = new THREE.Mesh(armGeo, metalMat);
+    // Sleek White Swivel Arm
+    const armGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.28, 16);
+    const armMesh = new THREE.Mesh(armGeo, whiteMat);
     armMesh.rotation.z = Math.PI / 3;
-    armMesh.position.set(-0.1, -0.08, 0);
+    armMesh.position.set(-0.11, -0.07, 0);
     this.cameraGroup.add(armMesh);
 
+    // Camera Head Group
     this.cameraHead = new THREE.Group();
-    this.cameraHead.position.set(-0.2, -0.15, 0);
+    this.cameraHead.position.set(-0.24, -0.14, 0);
 
-    const bodyGeo = new THREE.CylinderGeometry(0.09, 0.07, 0.35, 16);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.5 });
-    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-    bodyMesh.rotation.z = Math.PI / 2;
-    this.cameraHead.add(bodyMesh);
+    // Main White Capsule Housing Body
+    const housingGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.36, 24);
+    const housingMesh = new THREE.Mesh(housingGeo, whiteMat);
+    housingMesh.rotation.z = Math.PI / 2;
+    this.cameraHead.add(housingMesh);
 
-    const lensGeo = new THREE.CylinderGeometry(0.075, 0.075, 0.05, 16);
-    const lensMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9 });
+    // White Top Sun Shade Shield
+    const visorGeo = new THREE.BoxGeometry(0.38, 0.02, 0.19);
+    const visorMesh = new THREE.Mesh(visorGeo, whiteMat);
+    visorMesh.position.set(0, 0.1, 0);
+    this.cameraHead.add(visorMesh);
+
+    // Contrast Black Front Lens Faceplate
+    const faceGeo = new THREE.CylinderGeometry(0.085, 0.085, 0.02, 24);
+    const blackFaceMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9 });
+    const faceMesh = new THREE.Mesh(faceGeo, blackFaceMat);
+    faceMesh.rotation.z = Math.PI / 2;
+    faceMesh.position.set(-0.181, 0, 0);
+    this.cameraHead.add(faceMesh);
+
+    // Dark Glass Optical Camera Lens Element
+    const lensGeo = new THREE.CircleGeometry(0.065, 24);
+    const lensMat = new THREE.MeshStandardMaterial({ color: 0x00b7ff, roughness: 0.05, metalness: 1.0, opacity: 0.9, transparent: true });
     const lensMesh = new THREE.Mesh(lensGeo, lensMat);
-    lensMesh.rotation.z = Math.PI / 2;
-    lensMesh.position.set(-0.18, 0, 0);
+    lensMesh.rotation.y = -Math.PI / 2;
+    lensMesh.position.set(-0.192, 0, 0);
     this.cameraHead.add(lensMesh);
 
-    const ledGeo = new THREE.SphereGeometry(0.015, 12, 12);
+    // Glowing Red Recording LED Dot
+    const ledGeo = new THREE.SphereGeometry(0.018, 12, 12);
     const ledMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const ledMesh = new THREE.Mesh(ledGeo, ledMat);
-    ledMesh.position.set(-0.19, 0.06, 0.04);
+    ledMesh.position.set(-0.185, 0.055, 0.045);
     this.cameraHead.add(ledMesh);
+
+    const redLedLight = new THREE.PointLight(0xff0000, 1.2, 2.5);
+    redLedLight.position.set(-0.2, 0.055, 0.045);
+    this.cameraHead.add(redLedLight);
 
     this.cameraGroup.add(this.cameraHead);
     this.scene.add(this.cameraGroup);
@@ -769,9 +792,20 @@ export class Scene3D {
       this.ceilingLights.forEach(light => light.intensity = intensity);
     }
 
-    // 4. Tracking Security Camera Anomaly
-    if (this.enableCameraTracking && this.cameraHead) {
-      this.cameraHead.lookAt(this.camera.position);
+    // 4. PRECISE SECURITY CAMERA TRACKING ANOMALY
+    if (this.enableCameraTracking && this.cameraHead && this.cameraGroup) {
+      const camWorldPos = new THREE.Vector3();
+      this.cameraHead.getWorldPosition(camWorldPos);
+
+      const dirX = this.playerPos.x - camWorldPos.x;
+      const dirY = this.playerPos.y - camWorldPos.y;
+      const dirZ = this.playerPos.z - camWorldPos.z;
+
+      const yaw = Math.atan2(dirX, dirZ);
+      const distXZ = Math.hypot(dirX, dirZ);
+      const pitch = Math.atan2(dirY, distXZ);
+
+      this.cameraHead.rotation.set(pitch, yaw - Math.PI / 2, 0, 'YXZ');
     }
 
     // 5. MANNEQUIN PROXIMITY CHASE & CATCH MECHANIC
