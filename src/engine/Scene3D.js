@@ -316,9 +316,9 @@ export class Scene3D {
     this.posterMesh.rotation.y = Math.PI / 2;
     this.scene.add(this.posterMesh);
 
-    // 4. Wall Spray Graffiti ("MIND TRAP")
+    // 4. Wall Spray Graffiti ("MIND TRAP") - Expanded Canvas Geometry & Resolution
     const graffitiTexture = this.generateGraffitiTexture("MIND TRAP");
-    const graffitiGeo = new THREE.PlaneGeometry(2.2, 0.8);
+    const graffitiGeo = new THREE.PlaneGeometry(3.6, 0.9);
     const graffitiMat = new THREE.MeshBasicMaterial({ map: graffitiTexture, transparent: true, opacity: 0.9 });
     this.graffitiMesh = new THREE.Mesh(graffitiGeo, graffitiMat);
     this.graffitiMesh.position.set(1.98, 1.6, 2);
@@ -719,18 +719,19 @@ export class Scene3D {
 
   generateGraffitiTexture(text = "MIND TRAP") {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 200;
+    canvas.width = 1024;
+    canvas.height = 256;
     const ctx = canvas.getContext('2d');
 
-    ctx.clearRect(0, 0, 512, 200);
+    ctx.clearRect(0, 0, 1024, 256);
 
     ctx.fillStyle = '#ff2a4b';
-    ctx.font = 'bold 64px sans-serif';
+    ctx.font = 'bold 72px sans-serif';
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.shadowColor = '#000000';
-    ctx.shadowBlur = 12;
-    ctx.fillText(text, 256, 120);
+    ctx.shadowBlur = 16;
+    ctx.fillText(text, 512, 128);
 
     return new THREE.CanvasTexture(canvas);
   }
