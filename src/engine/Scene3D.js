@@ -325,11 +325,12 @@ export class Scene3D {
     this.graffitiMesh.rotation.y = -Math.PI / 2;
     this.scene.add(this.graffitiMesh);
 
-    // 5. Ghost Shadow Silhouette
-    const shadowGeo = new THREE.PlaneGeometry(0.8, 1.8);
-    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.85 });
+    // 5. DETAILED HUMANOID GHOST SHADOW SILHOUETTE
+    const shadowTexture = this.generateGhostShadowTexture();
+    const shadowGeo = new THREE.PlaneGeometry(1.0, 2.2);
+    const shadowMat = new THREE.MeshBasicMaterial({ map: shadowTexture, transparent: true, opacity: 0.9 });
     this.ghostShadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
-    this.ghostShadowMesh.position.set(1.99, 1.0, -2);
+    this.ghostShadowMesh.position.set(1.99, 1.1, -2);
     this.ghostShadowMesh.rotation.y = -Math.PI / 2;
     this.ghostShadowMesh.visible = false;
     this.scene.add(this.ghostShadowMesh);
@@ -409,6 +410,47 @@ export class Scene3D {
 
     this.mannequinGroup.visible = false;
     this.scene.add(this.mannequinGroup);
+  }
+
+  generateGhostShadowTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, 256, 512);
+
+    ctx.fillStyle = '#000000';
+    ctx.filter = 'blur(5px)';
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(128, 75, 42, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Neck
+    ctx.fillRect(115, 110, 26, 25);
+
+    // Broad Shoulders & Torso
+    ctx.beginPath();
+    ctx.moveTo(55, 145);
+    ctx.quadraticCurveTo(128, 125, 201, 145);
+    ctx.lineTo(178, 340);
+    ctx.lineTo(78, 340);
+    ctx.closePath();
+    ctx.fill();
+
+    // Arms Silhouette
+    ctx.beginPath();
+    ctx.ellipse(52, 235, 18, 85, 0.1, 0, Math.PI * 2);
+    ctx.ellipse(204, 235, 18, 85, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Legs
+    ctx.fillRect(82, 335, 38, 160);
+    ctx.fillRect(136, 335, 38, 160);
+
+    return new THREE.CanvasTexture(canvas);
   }
 
   setFloorTileDistortion(isDistorted) {
