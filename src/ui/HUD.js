@@ -11,54 +11,78 @@ export class HUD {
     this.gamepad = gamepadManager;
 
     // DOM Elements
-    this.levelDisplay = document.getElementById('level-display');
-    this.sanityBar = document.getElementById('sanity-bar');
-    this.sanityText = document.getElementById('sanity-text');
-    this.hudHeader = document.querySelector('.hud-header');
-    this.hudFooter = document.querySelector('.hud-footer');
+    this.levelDisplay = document.getElementById('level-counter') || document.getElementById('level-display');
+    this.sanityBar = document.getElementById('sanity-bar-fill') || document.getElementById('sanity-bar');
+    this.sanityText = document.getElementById('sanity-value') || document.getElementById('sanity-text');
+    this.archiveBadge = document.getElementById('archive-badge') || document.getElementById('archive-count');
 
-    // Controls Info Badges
-    this.badgeControlMode = document.getElementById('badge-control-mode');
-
-    // Buttons
-    this.btnNormal = document.getElementById('btn-decision-normal');
-    this.btnAnomaly = document.getElementById('btn-decision-anomaly');
-    this.btnSettings = document.getElementById('btn-settings');
-    this.btnDevDebug = document.getElementById('btn-dev-debug');
-    this.btnArchive = document.getElementById('btn-archive');
-    this.btnFullscreen = document.getElementById('btn-fullscreen');
+    // Decision & Action Buttons
+    this.btnNormal = document.getElementById('btn-proceed-normal') || document.getElementById('btn-decision-normal');
+    this.btnAnomaly = document.getElementById('btn-report-anomaly') || document.getElementById('btn-decision-anomaly');
+    this.btnSettings = document.getElementById('btn-open-settings') || document.getElementById('btn-settings');
+    this.btnDevDebug = document.getElementById('btn-open-dev-debug') || document.getElementById('btn-dev-debug');
+    this.btnArchive = document.getElementById('btn-open-archive') || document.getElementById('btn-archive');
+    this.btnFullscreen = document.getElementById('btn-toggle-fullscreen') || document.getElementById('btn-fullscreen');
 
     // Modals
+    this.modalWarning = document.getElementById('modal-warning');
     this.modalSettings = document.getElementById('modal-settings');
     this.modalArchive = document.getElementById('modal-archive');
     this.modalDevDebug = document.getElementById('modal-dev-debugger');
     this.modalVictory = document.getElementById('modal-victory');
     this.modalDefeat = document.getElementById('modal-defeat');
-    this.glitchOverlay = document.getElementById('glitch-overlay');
+    this.glitchOverlay = document.getElementById('glitch-flash-overlay') || document.getElementById('glitch-overlay');
 
     // Settings Inputs
-    this.volMaster = document.getElementById('vol-master');
+    this.volMaster = document.getElementById('rng-master-volume') || document.getElementById('vol-master');
     this.volSfx = document.getElementById('vol-sfx');
     this.volAmbient = document.getElementById('vol-ambient');
-    this.toggleHaptics = document.getElementById('toggle-haptics');
+    this.toggleHaptics = document.getElementById('chk-vibration-enable') || document.getElementById('toggle-haptics');
     this.sensitivityRange = document.getElementById('sensitivity-range');
 
     // Dev Debugger Index
     this.devAnomalyIndex = 0;
 
+    // Callback handlers
+    this.onDecision = null;
+    this.onDecisionCallback = null;
+
     this.initListeners();
   }
 
   initListeners() {
+    // 0. START GAME / Warning Modal Accept Button
+    const btnAcceptWarning = document.getElementById('btn-accept-warning');
+    if (btnAcceptWarning && this.modalWarning) {
+      btnAcceptWarning.addEventListener('click', () => {
+        this.closeModal(this.modalWarning);
+        const hudEl = document.getElementById('hud');
+        if (hudEl) {
+          hudEl.classList.remove('hud-hidden');
+          hudEl.style.display = 'block';
+        }
+        if (this.audio) {
+          this.audio.resume();
+          this.audio.startAmbientDrone();
+        }
+        const canvas = document.getElementById('game-canvas');
+        if (canvas) {
+          canvas.requestPointerLock();
+        }
+      });
+    }
+
     // Decision Buttons
     if (this.btnNormal) {
       this.btnNormal.addEventListener('click', () => {
-        if (this.onDecision) this.onDecision(false);
+        const cb = this.onDecisionCallback || this.onDecision;
+        if (cb) cb(false);
       });
     }
     if (this.btnAnomaly) {
       this.btnAnomaly.addEventListener('click', () => {
-        if (this.onDecision) this.onDecision(true);
+        const cb = this.onDecisionCallback || this.onDecision;
+        if (cb) cb(true);
       });
     }
 
@@ -76,17 +100,17 @@ export class HUD {
       this.btnFullscreen.addEventListener('click', () => this.toggleFullscreenMode());
     }
 
-    // Close Buttons for Modals
-    document.querySelectorAll('.modal-close').forEach(btn => {
+    // Close Buttons for Modals (support .close-btn, .modal-close)
+    document.querySelectorAll('.close-btn, .modal-close').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const modal = e.target.closest('.modal-overlay');
+        const modal = e.target.closest('.modal-backdrop, .modal-overlay');
         this.closeModal(modal);
       });
     });
 
     // Settings Sliders & Toggles
     if (this.volMaster) {
-      this.volMaster.addEventListener('input', (e) => this.audio.setMasterVolume(parseFloat(e.target.value)));
+      this.volMaster.addEventListener('input', (e) => this.audio.setMasterVolume(parseFloat(e.target.value) / 100));
     }
     if (this.volSfx) {
       this.volSfx.addEventListener('input', (e) => this.audio.setSFXVolume(parseFloat(e.target.value)));
@@ -107,7 +131,7 @@ export class HUD {
       }
       if (e.key === '`' || e.key === '~') {
         if (this.modalDevDebug) {
-          if (this.modalDevDebug.style.display === 'flex') {
+          if (this.modalDevDebug.style.display === 'flex' || this.modalDevDebug.classList.contains('modal-active')) {
             this.closeModal(this.modalDevDebug);
           } else {
             this.openModal(this.modalDevDebug);
@@ -147,43 +171,55 @@ export class HUD {
     updateDevInfo();
 
     // PREV / NEXT Buttons
-    document.getElementById('btn-dev-prev').addEventListener('click', () => {
-      let idx = (this.devAnomalyIndex - 1 + ANOMALIES_DATABASE.length) % ANOMALIES_DATABASE.length;
-      select.value = idx;
-      updateDevInfo();
-    });
+    const btnPrev = document.getElementById('btn-dev-prev');
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        let idx = (this.devAnomalyIndex - 1 + ANOMALIES_DATABASE.length) % ANOMALIES_DATABASE.length;
+        select.value = idx;
+        updateDevInfo();
+      });
+    }
 
-    document.getElementById('btn-dev-next').addEventListener('click', () => {
-      let idx = (this.devAnomalyIndex + 1) % ANOMALIES_DATABASE.length;
-      select.value = idx;
-      updateDevInfo();
-    });
+    const btnNext = document.getElementById('btn-dev-next');
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        let idx = (this.devAnomalyIndex + 1) % ANOMALIES_DATABASE.length;
+        select.value = idx;
+        updateDevInfo();
+      });
+    }
 
-    // APPLY ANOMALY Button (Now sets gameLoop.hasAnomalyThisTurn = true)
-    document.getElementById('btn-dev-apply').addEventListener('click', () => {
-      const anomaly = ANOMALIES_DATABASE[this.devAnomalyIndex];
-      if (anomaly && scene3D) {
-        scene3D.resetHallway();
-        anomaly.apply(scene3D);
-        if (gameLoop) {
-          gameLoop.hasAnomalyThisTurn = true;
-          gameLoop.currentAnomaly = anomaly;
+    // APPLY ANOMALY Button
+    const btnApply = document.getElementById('btn-dev-apply');
+    if (btnApply) {
+      btnApply.addEventListener('click', () => {
+        const anomaly = ANOMALIES_DATABASE[this.devAnomalyIndex];
+        if (anomaly && scene3D) {
+          scene3D.resetHallway();
+          anomaly.apply(scene3D);
+          if (gameLoop) {
+            gameLoop.hasAnomalyThisTurn = true;
+            gameLoop.currentAnomaly = anomaly;
+          }
+          this.closeModal(this.modalDevDebug);
         }
-        this.closeModal(this.modalDevDebug);
-      }
-    });
+      });
+    }
 
-    // RESET TO NORMAL Button (Now sets gameLoop.hasAnomalyThisTurn = false)
-    document.getElementById('btn-dev-reset').addEventListener('click', () => {
-      if (scene3D) {
-        scene3D.resetHallway();
-        if (gameLoop) {
-          gameLoop.hasAnomalyThisTurn = false;
-          gameLoop.currentAnomaly = null;
+    // RESET TO NORMAL Button
+    const btnReset = document.getElementById('btn-dev-reset');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        if (scene3D) {
+          scene3D.resetHallway();
+          if (gameLoop) {
+            gameLoop.hasAnomalyThisTurn = false;
+            gameLoop.currentAnomaly = null;
+          }
+          this.closeModal(this.modalDevDebug);
         }
-        this.closeModal(this.modalDevDebug);
-      }
-    });
+      });
+    }
   }
 
   openModal(modalEl) {
@@ -204,7 +240,11 @@ export class HUD {
 
   updateLevel(level) {
     if (this.levelDisplay) {
-      this.levelDisplay.innerText = `${level.toString().padStart(2, '0')} / 08`;
+      this.levelDisplay.innerHTML = `${level.toString().padStart(2, '0')} <span class="level-total">/ 08</span>`;
+    }
+    const progressBar = document.getElementById('level-progress-bar');
+    if (progressBar) {
+      progressBar.style.width = `${(level / 8) * 100}%`;
     }
   }
 
@@ -218,9 +258,8 @@ export class HUD {
   }
 
   updateArchiveCount(discovered, total) {
-    const archiveBadge = document.getElementById('archive-count');
-    if (archiveBadge) {
-      archiveBadge.innerText = `${discovered}/${total}`;
+    if (this.archiveBadge) {
+      this.archiveBadge.innerText = `${discovered}/${total}`;
     }
   }
 
