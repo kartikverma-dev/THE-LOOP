@@ -32,6 +32,10 @@ export class HUD {
     this.modalSettings = document.getElementById('modal-settings');
     this.modalArchive = document.getElementById('modal-archive');
     this.modalVictory = document.getElementById('modal-victory');
+    this.modalDevDebug = document.getElementById('modal-dev-debugger');
+
+    // Dev Debugger State
+    this.devAnomalyIndex = 0;
 
     // Waveform Animation
     this.wavePath = document.getElementById('wave-path');
@@ -102,13 +106,35 @@ export class HUD {
       }
     });
 
-    // 4. Offline Game Download Button
+    // 4. Dev Debugger Modal Toggle
+    document.getElementById('btn-open-dev-debug').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.openModal(this.modalDevDebug);
+    });
+
+    document.getElementById('btn-close-dev-debug').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.closeModal(this.modalDevDebug);
+    });
+
+    // Hotkey ` (Tilde / Backtick) to toggle Dev Debugger
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '`' || e.key === '~') {
+        if (this.modalDevDebug.classList.contains('modal-active')) {
+          this.closeModal(this.modalDevDebug);
+        } else {
+          this.openModal(this.modalDevDebug);
+        }
+      }
+    });
+
+    // 5. Offline Game Download Button
     document.getElementById('btn-offline-download').addEventListener('click', (e) => {
       e.preventDefault();
       this.downloadStandaloneGame();
     });
 
-    // 5. Settings Tab Switching
+    // 6. Settings Tab Switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -121,7 +147,7 @@ export class HUD {
       });
     });
 
-    // 6. Test Vibration Button
+    // 7. Test Vibration Button
     document.getElementById('btn-test-vibration').addEventListener('click', (e) => {
       e.preventDefault();
       this.haptics.triggerHeartbeat();
@@ -159,6 +185,67 @@ export class HUD {
       setTimeout(() => {
         btn.innerText = '📋 COPY RESULTS';
       }, 2500);
+    });
+  }
+
+  setupDevDebugger(scene3D) {
+    const select = document.getElementById('select-dev-anomaly');
+    if (!select) return;
+
+    select.innerHTML = '';
+    ANOMALIES_DATABASE.forEach((a, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.innerText = `${(i + 1).toString().padStart(2, '0')}. ${a.name} [${a.difficulty}]`;
+      select.appendChild(opt);
+    });
+
+    const updateDevInfo = () => {
+      const idx = parseInt(select.value, 10);
+      this.devAnomalyIndex = idx;
+      const anomaly = ANOMALIES_DATABASE[idx];
+
+      if (anomaly) {
+        document.getElementById('dev-info-title').innerText = `👁️ ${anomaly.name}`;
+        document.getElementById('dev-info-desc').innerText = anomaly.description;
+        document.getElementById('dev-info-type').innerText = `Type: ${anomaly.type}`;
+        document.getElementById('dev-info-diff').innerText = `Difficulty: ${anomaly.difficulty}`;
+        document.getElementById('dev-info-id').innerText = `ID: ${anomaly.id}`;
+      }
+    };
+
+    select.addEventListener('change', updateDevInfo);
+    updateDevInfo();
+
+    // PREV / NEXT Buttons
+    document.getElementById('btn-dev-prev').addEventListener('click', () => {
+      let idx = (this.devAnomalyIndex - 1 + ANOMALIES_DATABASE.length) % ANOMALIES_DATABASE.length;
+      select.value = idx;
+      updateDevInfo();
+    });
+
+    document.getElementById('btn-dev-next').addEventListener('click', () => {
+      let idx = (this.devAnomalyIndex + 1) % ANOMALIES_DATABASE.length;
+      select.value = idx;
+      updateDevInfo();
+    });
+
+    // APPLY ANOMALY Button
+    document.getElementById('btn-dev-apply').addEventListener('click', () => {
+      const anomaly = ANOMALIES_DATABASE[this.devAnomalyIndex];
+      if (anomaly && scene3D) {
+        scene3D.resetHallway();
+        anomaly.apply(scene3D);
+        this.closeModal(this.modalDevDebug);
+      }
+    });
+
+    // RESET TO NORMAL Button
+    document.getElementById('btn-dev-reset').addEventListener('click', () => {
+      if (scene3D) {
+        scene3D.resetHallway();
+        this.closeModal(this.modalDevDebug);
+      }
     });
   }
 

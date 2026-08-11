@@ -57,6 +57,7 @@
         </div>
 
         <div class="top-quick-actions">
+          <button type="button" id="btn-open-dev-debug" class="icon-btn" title="Dev Anomaly Tester (Press ~ Key)">🛠️</button>
           <button type="button" id="btn-open-settings" class="icon-btn" title="Settings">⚙️</button>
           <button type="button" id="btn-open-archive" class="icon-btn" title="Anomaly Gallery">📖 <span id="archive-badge" class="badge">0</span></button>
           <button type="button" id="btn-toggle-fullscreen" class="icon-btn" title="Toggle Fullscreen">⛶</button>
@@ -280,6 +281,40 @@
 
       <div id="archive-grid" class="archive-grid">
         <!-- Dynamically populated via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- DEV ANOMALY TESTER & DEBUGGER MODAL -->
+  <div id="modal-dev-debugger" class="modal-backdrop">
+    <div class="modal-box glass-card wide-modal">
+      <div class="modal-header">
+        <h2>🛠️ DEV ANOMALY TESTER & DEBUGGER</h2>
+        <button type="button" id="btn-close-dev-debug" class="close-btn">✕</button>
+      </div>
+
+      <div class="debug-controls-bar">
+        <label for="select-dev-anomaly" class="debug-label">Select Anomaly to Test:</label>
+        <select id="select-dev-anomaly" class="debug-select">
+          <!-- Dynamically populated via JS -->
+        </select>
+
+        <div class="debug-btn-group">
+          <button type="button" id="btn-dev-prev" class="secondary-btn">◄ PREV</button>
+          <button type="button" id="btn-dev-apply" class="primary-btn pulse">▶ APPLY ANOMALY</button>
+          <button type="button" id="btn-dev-next" class="secondary-btn">NEXT ►</button>
+          <button type="button" id="btn-dev-reset" class="secondary-btn warning-tint">🔄 RESET TO NORMAL</button>
+        </div>
+      </div>
+
+      <div id="dev-anomaly-info" class="debug-info-card">
+        <div class="info-title" id="dev-info-title">No Anomaly Selected</div>
+        <div class="info-desc" id="dev-info-desc">Select an anomaly from the dropdown or click PREV/NEXT to test in real-time.</div>
+        <div class="info-meta">
+          <span id="dev-info-type" class="badge">Type: -</span>
+          <span id="dev-info-diff" class="badge">Difficulty: -</span>
+          <span id="dev-info-id" class="badge">ID: -</span>
+        </div>
       </div>
     </div>
   </div>
