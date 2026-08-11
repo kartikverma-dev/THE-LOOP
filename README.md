@@ -18,6 +18,25 @@ You are trapped in **Sector 08**, a subterranean liminal hallway loop that repea
 
 ---
 
+## 📋 Permission Matrix & Policy
+
+**THE-LOOP is source-available software, not open-source.** Contributions are welcome through pull requests. Copyright and commercial rights remain strictly with the original author (**Kartik Verma**).
+
+| Permission / Action | Status | Notes |
+| :--- | :---: | :--- |
+| **View source code & assets** | ✅ | Publicly readable for inspecting and learning |
+| **Learn from implementation** | ✅ | Free to study WebGL, Three.js, and Web Audio techniques |
+| **Fork for development** | ✅ | Forking permitted to prepare pull requests |
+| **Submit Pull Requests** | ✅ | Community contributions (bug fixes, new anomalies) welcome |
+| **Modify for personal experimentation** | ✅ | Local modification for private learning & testing permitted |
+| **Redistribute THE-LOOP** | ❌ | Public/commercial re-hosting or re-distribution is prohibited |
+| **Sell THE-LOOP** | ❌ | Commercial sale of code, assets, or builds is prohibited |
+| **Rebrand & publish as your game** | ❌ | Re-branding or claiming original authorship is prohibited |
+| **Commercially reuse assets** | ❌ | Code, 3D shaders, and synthesized audio assets are protected |
+| **Claim ownership of THE-LOOP** | ❌ | All copyright and commercial rights belong to Kartik Verma |
+
+---
+
 ## 🌟 Key Features
 
 - **🎨 High-Fidelity 3D WebGL Graphics**: Built with Three.js featuring ACES Filmic tone mapping, SRGB color space, dynamic lighting, reflections, wet floor tiles, and 2D canvas procedural posters and signs.
@@ -63,12 +82,7 @@ Open `http://localhost:3000` in your browser.
 
 ---
 
-## 📜 License & Rights Notice
+## 📜 License Notice
 
-**THE-LOOP is source-available, not open-source.**
-
-- **Source-Available**: The codebase is public for viewing, inspecting, learning, and testing.
-- **Contributions**: Contributions and pull requests are welcome! By submitting a pull request, you grant the project maintainer permission to incorporate your contributions.
-- **Copyright & Commercial Rights**: All copyright, trademark, and commercial rights remain strictly with the original author (**Kartik Verma**). Commercial re-distribution, re-branding, or selling of this software or its assets without written consent is prohibited.
-
-Copyright (c) 2026 Kartik Verma. All Rights Reserved.
+Copyright (c) 2026 Kartik Verma. All Rights Reserved.  
+See [`LICENSE`](./LICENSE) for full source-available terms and conditions.

@@ -1,7 +1,13 @@
 {
-  "name": "loop8-mind-trap",
-  "private": true,
+  "name": "the-loop-mind-trap",
   "version": "1.0.0",
+  "description": "A subterranean 3D liminal psychological horror web game inspired by Exit 8.",
+  "author": "Kartik Verma <kartikverma0804@gmail.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kartikverma-dev/THE-LOOP.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

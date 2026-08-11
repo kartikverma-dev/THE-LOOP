@@ -2,10 +2,29 @@ SOURCE-AVAILABLE LICENSE AGREEMENT
 
 Copyright (c) 2026 Kartik Verma. All Rights Reserved.
 
-This software ("THE LOOP // Mind Trap") and its associated source code and documentation files are source-available for viewing, education, and community contribution under the following conditions:
+THE LOOP // Mind Trap is source-available software. The repository is open for community viewing, education, personal experimentation, and pull request contributions. Copyright and commercial rights remain exclusively with the original author (Kartik Verma).
 
-1. SOURCE-AVAILABLE: The source code is publicly accessible for reading, inspecting, testing, and learning.
-2. CONTRIBUTIONS: Community contributions and pull requests are welcome. By submitting a pull request, you grant the author permission to incorporate your contributions into the project.
-3. COPYRIGHT & COMMERCIAL RIGHTS: All copyright, trademark, and commercial distribution rights remain exclusively with the original author (Kartik Verma). You may not re-license, sell, re-distribute for commercial gain, or re-brand this software or its visual assets without express written consent from the copyright holder.
+=============================================================================
+PERMISSION MATRIX
+=============================================================================
+
+[PERMITTED ACTIONS]
+- ✅ View Source Code & Assets
+- ✅ Learn from and study the 3D WebGL / Web Audio implementation
+- ✅ Fork repository for pull request development
+- ✅ Submit Pull Requests (Bug fixes, new anomalies, performance enhancements)
+- ✅ Modify locally for personal experimentation & learning
+
+[PROHIBITED ACTIONS]
+- ❌ Re-distribute THE LOOP (or modified copies) publicly or commercially
+- ❌ Sell THE LOOP or any part of its source code / assets
+- ❌ Re-brand and publish THE LOOP as your own game
+- ❌ Commercially reuse code, 3D shaders, or synthesized audio assets
+- ❌ Claim ownership or original authorship of THE LOOP
+
+=============================================================================
+CONTRIBUTIONS
+=============================================================================
+By submitting a Pull Request to this repository, you grant the project maintainer (Kartik Verma) a perpetual, non-exclusive license to review, merge, modify, and distribute your submitted contributions as part of THE LOOP.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
