@@ -30,7 +30,7 @@ function init() {
   gamepadManager = new GamepadManager();
   hudUI = new HUD(audioEngine, hapticsManager, gamepadManager);
   gameLoop = new GameLoop(scene3D, audioEngine, hapticsManager, hudUI);
-  hudUI.setupDevDebugger(scene3D);
+  hudUI.setupDevDebugger(scene3D, gameLoop);
   window.gameLoop = gameLoop;
 
   // Audio Context Resume Listener on any user click/touch
