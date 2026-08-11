@@ -169,7 +169,7 @@ export class HUD {
   }
 
   setupDevDebugger(scene3D, gameLoop) {
-    const select = document.getElementById('dev-anomaly-select');
+    const select = document.getElementById('select-dev-anomaly') || document.getElementById('dev-anomaly-select');
     if (!select) return;
 
     select.innerHTML = '';
