@@ -40,8 +40,10 @@ export class HUD {
     this.toggleHaptics = document.getElementById('chk-vibration-enable') || document.getElementById('toggle-haptics');
     this.sensitivityRange = document.getElementById('sensitivity-range');
 
-    // Dev Debugger Index
+    // Dev Debugger Index & Secret Counter
     this.devAnomalyIndex = 0;
+    this.badgeTapCount = 0;
+    this.lastTapTime = 0;
 
     // Callback handlers
     this.onDecision = null;
@@ -122,14 +124,19 @@ export class HUD {
       this.toggleHaptics.addEventListener('change', (e) => this.haptics.setEnabled(e.target.checked));
     }
 
-    // Keyboard Hotkeys
+    // SECRET KEYBOARD COMBO: Shift + D (or ~ / `) to toggle Dev Debugger
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.closeModal(this.modalSettings);
         this.closeModal(this.modalArchive);
         this.closeModal(this.modalDevDebug);
       }
-      if (e.key === '`' || e.key === '~') {
+      
+      const isShiftD = e.shiftKey && (e.key === 'D' || e.key === 'd');
+      const isTilde = e.key === '`' || e.key === '~';
+
+      if (isShiftD || isTilde) {
+        e.preventDefault();
         if (this.modalDevDebug) {
           if (this.modalDevDebug.style.display === 'flex' || this.modalDevDebug.classList.contains('modal-active')) {
             this.closeModal(this.modalDevDebug);
@@ -139,6 +146,26 @@ export class HUD {
         }
       }
     });
+
+    // SECRET MOBILE TRIPLE TAP: Triple tap top-left FLOOR badge to open Dev Debugger
+    const topLeftPanel = document.querySelector('.hud-top-left');
+    if (topLeftPanel) {
+      topLeftPanel.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - this.lastTapTime < 500) {
+          this.badgeTapCount++;
+        } else {
+          this.badgeTapCount = 1;
+        }
+        this.lastTapTime = now;
+
+        if (this.badgeTapCount >= 3) {
+          this.badgeTapCount = 0;
+          this.openModal(this.modalDevDebug);
+          if (this.haptics) this.haptics.triggerSuccess();
+        }
+      });
+    }
   }
 
   setupDevDebugger(scene3D, gameLoop) {
