@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>LOOP 8 // MIND TRAP - Liminal Anomaly Web Game</title>
+  <meta name="description" content="A psychological liminal anomaly-detection web game inspired by Exit 8. Ascend from Floor 0 to Floor 8. Spot the tricks, remember patterns, or get reset!" />
+  <meta name="theme-color" content="#0a0c10" />
+  
+  <!-- Web App Manifest for PWA Install -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/src/style.css?v=1.0.2" />
+</head>
+<body>
+  <!-- 3D Canvas -->
+  <div id="canvas-container">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- CRT Scanline & Grain Overlay -->
+  <div id="crt-overlay" class="crt-active"></div>
+  <div id="glitch-flash-overlay"></div>
+
+  <!-- Main UI HUD -->
+  <div id="hud" class="hud-hidden">
+    <!-- Top Responsive Header Bar -->
+    <header class="hud-top-bar">
+      <!-- Left Level Badge -->
+      <div class="hud-panel hud-top-left glass-card">
+        <div class="panel-header">
+          <span class="pulse-dot"></span>
+          <span class="game-tag">LOOP 8</span>
+        </div>
+        <div class="level-display">
+          <span class="level-label">FLOOR</span>
+          <span id="level-counter" class="level-number">00 <span class="level-total">/ 08</span></span>
+        </div>
+        <div class="progress-bar-container">
+          <div id="level-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Right Controller & Action Buttons -->
+      <div class="hud-panel hud-top-right glass-card">
+        <div class="controller-status">
+          <div id="controller-icon" class="status-icon">🎮</div>
+          <div class="status-info">
+            <span id="controller-name" class="status-title">Touch / Keyboard</span>
+            <span id="haptic-status-badge" class="status-sub active">HAPTIC: READY</span>
+          </div>
+        </div>
+
+        <div class="top-quick-actions">
+          <button type="button" id="btn-open-settings" class="icon-btn" title="Settings">⚙️</button>
+          <button type="button" id="btn-open-archive" class="icon-btn" title="Anomaly Gallery">📖 <span id="archive-badge" class="badge">0</span></button>
+          <button type="button" id="btn-toggle-fullscreen" class="icon-btn" title="Toggle Fullscreen">⛶</button>
+          <button type="button" id="btn-offline-download" class="icon-btn" title="Download Game for Offline Play">📥</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Center Aim Crosshair & Inspection Hint -->
+    <div id="crosshair" class="crosshair">
+      <div class="crosshair-dot"></div>
+      <div id="inspect-hint" class="inspect-hint">Use D-Pad or WASD to Walk to Posters</div>
+    </div>
+
+    <!-- Bottom Action & Decision Section -->
+    <div class="hud-bottom-container">
+      <!-- Mobile Touch D-Pad Walk Controller -->
+      <div id="mobile-dpad" class="dpad-container mobile-only">
+        <button type="button" id="btn-dpad-up" class="dpad-btn dpad-up">▲<span class="dpad-label">WALK</span></button>
+        <div class="dpad-row">
+          <button type="button" id="btn-dpad-left" class="dpad-btn dpad-left">◄</button>
+          <div class="dpad-center"></div>
+          <button type="button" id="btn-dpad-right" class="dpad-btn dpad-right">►</button>
+        </div>
+        <button type="button" id="btn-dpad-down" class="dpad-btn dpad-down">▼<span class="dpad-label">BACK</span></button>
+      </div>
+
+      <!-- Decision Buttons -->
+      <div class="hud-bottom-decisions">
+        <button type="button" id="btn-proceed-normal" class="decision-btn btn-proceed">
+          <span class="btn-glow"></span>
+          <span class="btn-content">
+            <span class="btn-icon">↗</span>
+            <span class="btn-text">PROCEED NORMAL</span>
+            <span class="btn-keyhint">[ Walk to Door ]</span>
+          </span>
+        </button>
+
+        <button type="button" id="btn-report-anomaly" class="decision-btn btn-anomaly">
+          <span class="btn-glow"></span>
+          <span class="btn-content">
+            <span class="btn-icon">⚠️</span>
+            <span class="btn-text">TURN BACK - ANOMALY!</span>
+            <span class="btn-keyhint">[ Turn Back ]</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Sanity / Mind Stability Bar -->
+    <div class="hud-panel hud-bottom-sanity glass-card">
+      <div class="sanity-header">
+        <span>MIND STABILITY / SANITY</span>
+        <span id="sanity-value">100%</span>
+      </div>
+      <div class="sanity-bar-bg">
+        <div id="sanity-bar-fill" class="sanity-bar-fill" style="width: 100%;"></div>
+      </div>
+    </div>
+
+    <!-- Touch Look Screen Overlay -->
+    <div id="mobile-controls" class="mobile-only">
+      <div id="touch-look-zone" class="touch-look-zone">
+        <span class="touch-look-hint">Swipe Canvas to Look Around</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STARTUP MODAL: Photosensitivity & Safety Warning -->
+  <div id="modal-warning" class="modal-backdrop modal-active">
+    <div class="modal-box warning-box glass-card">
+      <div class="warning-icon">⚠️</div>
+      <h2>PHOTOSENSITIVITY & SAFETY WARNING</h2>
+      <div class="warning-body">
+        <p>This game contains <strong>flickering lights</strong>, <strong>rapid color transitions</strong>, <strong>glitch visual effects</strong>, and <strong>psychological audio tension</strong> that may trigger discomfort or seizures for individuals with photosensitive epilepsy.</p>
+        <p>Headphones and Gamepads / Mobile Haptics are recommended for the full experience.</p>
+      </div>
+
+      <div class="warning-options">
+        <label class="checkbox-label">
+          <input type="checkbox" id="chk-reduced-flashing" />
+          <span>Enable Reduced Flashing & Photosensitive Safe Mode</span>
+        </label>
+      </div>
+
+      <div class="warning-actions">
+        <button type="button" id="btn-accept-warning" class="primary-btn pulse">I UNDERSTAND - START GAME</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL: Keys, Gamepad, Haptics & Comfort -->
+  <div id="modal-settings" class="modal-backdrop">
+    <div class="modal-box glass-card">
+      <div class="modal-header">
+        <h2>⚙️ GAME SETTINGS & CONTROLS</h2>
+        <button type="button" id="btn-close-settings" class="close-btn">✕</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button type="button" class="tab-btn active" data-tab="tab-haptics">📳 Haptics & Audio</button>
+        <button type="button" class="tab-btn" data-tab="tab-gamepad">🎮 Controller Setup</button>
+        <button type="button" class="tab-btn" data-tab="tab-keyboard">⌨️ Key Remapping</button>
+        <button type="button" class="tab-btn" data-tab="tab-comfort">👁️ Visual Comfort</button>
+      </div>
+
+      <div class="modal-tab-content">
+        <!-- Haptics & Audio Tab -->
+        <div id="tab-haptics" class="tab-pane active">
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Mobile Touch & Gamepad Haptic Vibration</div>
+              <div class="setting-desc">Triggers footstep taps, anomaly heartbeat rumbles, and trap bursts.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-vibration-enable" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Vibration Strength Intensity</div>
+              <div class="setting-desc">Adjust motor rumble force.</div>
+            </div>
+            <input type="range" id="rng-vibration-strength" min="1" max="10" value="8" />
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Master Audio Volume</div>
+              <div class="setting-desc">Binaural spatial drone, footsteps, and sound effects.</div>
+            </div>
+            <input type="range" id="rng-master-volume" min="0" max="100" value="80" />
+          </div>
+          
+          <button type="button" id="btn-test-vibration" class="secondary-btn">⚡ Test Haptic Vibration Pulse</button>
+        </div>
+
+        <!-- Gamepad Tab -->
+        <div id="tab-gamepad" class="tab-pane">
+          <div id="gamepad-info-card" class="info-card">
+            <div id="gamepad-detected-title">Looking for Connected Controllers...</div>
+            <div id="gamepad-detected-sub">Plug in any Xbox, PlayStation, Switch, PC, or PS2-USB Gamepad and press any button.</div>
+          </div>
+
+          <div class="gamepad-diagram">
+            <div class="diagram-item"><span>Left Analog Stick</span> <span>Move Forward / Backward</span></div>
+            <div class="diagram-item"><span>Right Analog Stick</span> <span>Look Around Camera</span></div>
+            <div class="diagram-item"><span>Button A / Cross (×)</span> <span>Proceed Normal (Forward)</span></div>
+            <div class="diagram-item"><span>Button B / Circle (○)</span> <span>Turn Back - Anomaly!</span></div>
+            <div class="diagram-item"><span>Button X / Square (□)</span> <span>Inspect Object</span></div>
+            <div class="diagram-item"><span>Start / Menu</span> <span>Pause / Open Settings</span></div>
+          </div>
+        </div>
+
+        <!-- Keyboard Tab -->
+        <div id="tab-keyboard" class="tab-pane">
+          <div class="keymap-grid">
+            <div class="keymap-row">
+              <span>Move Forward</span>
+              <button type="button" class="key-bind-btn" data-action="moveForward">W / Arrow Up</button>
+            </div>
+            <div class="keymap-row">
+              <span>Turn Around / Anomaly</span>
+              <button type="button" class="key-bind-btn" data-action="turnAround">S / Arrow Down</button>
+            </div>
+            <div class="keymap-row">
+              <span>Strafe Left</span>
+              <button type="button" class="key-bind-btn" data-action="moveLeft">A / Arrow Left</button>
+            </div>
+            <div class="keymap-row">
+              <span>Strafe Right</span>
+              <button type="button" class="key-bind-btn" data-action="moveRight">D / Arrow Right</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Comfort Tab -->
+        <div id="tab-comfort" class="tab-pane">
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Reduced Flashing & Jumpscare Comfort</div>
+              <div class="setting-desc">Replaces harsh flickering lights with gentle red glow warnings.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-comfort-flashing" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">CRT Scanlines Effect</div>
+              <div class="setting-desc">Toggle retro surveillance camera scanline lines overlay.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-crt-lines" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANOMALY GALLERY ARCHIVE MODAL -->
+  <div id="modal-archive" class="modal-backdrop">
+    <div class="modal-box glass-card wide-modal">
+      <div class="modal-header">
+        <h2>📖 ANOMALY ARCHIVE GALLERY</h2>
+        <button type="button" id="btn-close-archive" class="close-btn">✕</button>
+      </div>
+
+      <div class="archive-summary">
+        <span>DISCOVERED: <strong id="archive-count-text">0 / 25</strong> ANOMALIES</span>
+        <div class="archive-progress-bar">
+          <div id="archive-progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div id="archive-grid" class="archive-grid">
+        <!-- Dynamically populated via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ESCAPE VICTORY MODAL -->
+  <div id="modal-victory" class="modal-backdrop">
+    <div class="modal-box victory-box glass-card">
+      <div class="victory-icon">🎉</div>
+      <h1 class="victory-title">SURFACE ESCAPED!</h1>
+      <p class="victory-subtitle">You spotted every trick and broke out of Loop 8.</p>
+
+      <div class="stats-summary-card">
+        <div class="stat-item">
+          <span class="stat-value" id="victory-time">00:00</span>
+          <span class="stat-label">ESCAPE TIME</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="victory-resets">0</span>
+          <span class="stat-label">TOTAL RESETS</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="victory-precision">100%</span>
+          <span class="stat-label">MIND PRECISION</span>
+        </div>
+      </div>
+
+      <div class="victory-actions">
+        <button type="button" id="btn-restart-game" class="primary-btn">PLAY AGAIN</button>
+        <button type="button" id="btn-share-stats" class="secondary-btn">📋 COPY RESULTS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Bootstrap -->
+  <script type="module" src="/src/main.js?v=1.0.2"></script>
+</body>
+</html>
