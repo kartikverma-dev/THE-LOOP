@@ -537,13 +537,13 @@ export class Scene3D {
     ctx.strokeRect(8, 8, 496, 184);
 
     ctx.fillStyle = '#00b7ff';
-    ctx.font = 'bold 70px monospace';
+    ctx.font = 'bold 54px monospace';
     ctx.textAlign = 'center';
 
     if (isReversed) {
-      ctx.fillText('◀  TIXE  8', 256, 125);
+      ctx.fillText('◀   TIXE   8', 256, 120);
     } else {
-      ctx.fillText('8  EXIT  ▶', 256, 125);
+      ctx.fillText('8   EXIT   ▶', 256, 120);
     }
 
     return new THREE.CanvasTexture(canvas);
@@ -563,9 +563,9 @@ export class Scene3D {
     ctx.strokeRect(8, 8, 496, 184);
 
     ctx.fillStyle = '#00b7ff';
-    ctx.font = 'bold 64px monospace';
+    ctx.font = 'bold 54px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('◀ ENTRANCE 0', 256, 125);
+    ctx.fillText('◀ ENTRANCE 0', 256, 120);
 
     return new THREE.CanvasTexture(canvas);
   }
@@ -652,8 +652,10 @@ export class Scene3D {
     }
 
     if (this.exitSignMesh) {
+      const normTex = this.generateExitSignTexture(false);
       this.exitSignMesh.scale.x = 1;
-      this.exitSignMesh.material.map = this.generateExitSignTexture(false);
+      this.exitSignMesh.material.map = normTex;
+      this.exitSignMesh.material.emissiveMap = normTex;
       this.exitSignMesh.material.needsUpdate = true;
     }
     if (this.doorHandleMesh) {

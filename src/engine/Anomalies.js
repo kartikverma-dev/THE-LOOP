@@ -6,12 +6,14 @@ export const ANOMALIES_DATABASE = [
   {
     id: 'reversed-exit-sign',
     name: 'Reversed Exit Sign',
-    description: 'The overhead corridor Exit sign is printed backwards (8 TIXE).',
+    description: 'The overhead corridor Exit sign is printed backwards (◀ TIXE 8).',
     difficulty: 'Easy',
     type: 'visual',
     apply: (scene3D) => {
       if (scene3D.exitSignMesh) {
-        scene3D.exitSignMesh.material.map = scene3D.generateExitSignTexture(true);
+        const revTex = scene3D.generateExitSignTexture(true);
+        scene3D.exitSignMesh.material.map = revTex;
+        scene3D.exitSignMesh.material.emissiveMap = revTex;
         scene3D.exitSignMesh.material.needsUpdate = true;
       }
     }
