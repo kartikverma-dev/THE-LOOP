@@ -335,69 +335,151 @@ export class Scene3D {
     this.ghostShadowMesh.visible = false;
     this.scene.add(this.ghostShadowMesh);
 
-    // 6. SLEEK WHITE SIMPLE CCTV SECURITY CAMERA MODEL
+    // 6. HIGH-DETAIL COMMERCIAL WHITE CCTV CAMERA WITH METALLIC ACCENTS & SEAMS
     this.cameraGroup = new THREE.Group();
     this.cameraGroup.position.set(1.85, 2.5, 2.0);
 
-    // Sleek White Wall Mount Plate
+    // White Material with Realistic Shading
+    const whiteBodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.25, metalness: 0.3 });
+    const darkAccentMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2, metalness: 0.8 });
+    const metallicBoltMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.1, metalness: 0.9 });
+
+    // Sleek White Wall Mount Base Plate
     const plateGeo = new THREE.BoxGeometry(0.05, 0.22, 0.22);
-    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.3 });
-    const plateMesh = new THREE.Mesh(plateGeo, whiteMat);
+    const plateMesh = new THREE.Mesh(plateGeo, whiteBodyMat);
     this.cameraGroup.add(plateMesh);
 
-    // Sleek White Swivel Arm
+    // Dark Metallic Wall Plate Screws / Bolts (4 corners)
+    const boltGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 12);
+    const boltPos = [[-0.08, 0.08], [-0.08, -0.08], [0.08, 0.08], [0.08, -0.08]];
+    boltPos.forEach(([y, z]) => {
+      const boltMesh = new THREE.Mesh(boltGeo, metallicBoltMat);
+      boltMesh.rotation.z = Math.PI / 2;
+      boltMesh.position.set(-0.028, y, z);
+      this.cameraGroup.add(boltMesh);
+    });
+
+    // Dark Metallic Swivel Hinge Joint Ring
+    const hingeGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.05, 16);
+    const hingeMesh = new THREE.Mesh(hingeGeo, darkAccentMat);
+    hingeMesh.position.set(-0.05, 0, 0);
+    this.cameraGroup.add(hingeMesh);
+
+    // Sleek White Mounting Swivel Arm
     const armGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.28, 16);
-    const armMesh = new THREE.Mesh(armGeo, whiteMat);
-    armMesh.rotation.z = Math.PI / 3;
-    armMesh.position.set(-0.11, -0.07, 0);
+    const armMesh = new THREE.Mesh(armGeo, whiteBodyMat);
+    armMesh.rotation.x = Math.PI / 6;
+    armMesh.position.set(-0.08, -0.07, -0.08);
     this.cameraGroup.add(armMesh);
 
-    // Camera Head Group
+    // Camera Head Group (Forward Axis = -Z)
     this.cameraHead = new THREE.Group();
-    this.cameraHead.position.set(-0.24, -0.14, 0);
+    this.cameraHead.position.set(-0.15, -0.14, -0.18);
+
+    // Dark Rubber Seam Joint Collar (where arm meets camera casing)
+    const collarGeo = new THREE.CylinderGeometry(0.055, 0.055, 0.03, 20);
+    const collarMesh = new THREE.Mesh(collarGeo, darkAccentMat);
+    collarMesh.rotation.x = Math.PI / 2;
+    collarMesh.position.set(0, 0, 0.18);
+    this.cameraHead.add(collarMesh);
 
     // Main White Capsule Housing Body
     const housingGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.36, 24);
-    const housingMesh = new THREE.Mesh(housingGeo, whiteMat);
-    housingMesh.rotation.z = Math.PI / 2;
+    const housingMesh = new THREE.Mesh(housingGeo, whiteBodyMat);
+    housingMesh.rotation.x = Math.PI / 2; // Oriented along Z-axis
     this.cameraHead.add(housingMesh);
 
+    // Dark Gray Body Trim Line / Accent Stripe
+    const stripeGeo = new THREE.CylinderGeometry(0.091, 0.091, 0.02, 24);
+    const stripeMesh = new THREE.Mesh(stripeGeo, darkAccentMat);
+    stripeMesh.rotation.x = Math.PI / 2;
+    stripeMesh.position.set(0, 0, -0.05);
+    this.cameraHead.add(stripeMesh);
+
     // White Top Sun Shade Shield
-    const visorGeo = new THREE.BoxGeometry(0.38, 0.02, 0.19);
-    const visorMesh = new THREE.Mesh(visorGeo, whiteMat);
+    const visorGeo = new THREE.BoxGeometry(0.19, 0.02, 0.38);
+    const visorMesh = new THREE.Mesh(visorGeo, whiteBodyMat);
     visorMesh.position.set(0, 0.1, 0);
     this.cameraHead.add(visorMesh);
 
-    // Contrast Black Front Lens Faceplate
-    const faceGeo = new THREE.CylinderGeometry(0.085, 0.085, 0.02, 24);
-    const blackFaceMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9 });
-    const faceMesh = new THREE.Mesh(faceGeo, blackFaceMat);
-    faceMesh.rotation.z = Math.PI / 2;
-    faceMesh.position.set(-0.181, 0, 0);
-    this.cameraHead.add(faceMesh);
+    // Visor Front Dark Edge Lip Seam
+    const visorLipGeo = new THREE.BoxGeometry(0.192, 0.022, 0.02);
+    const visorLipMesh = new THREE.Mesh(visorLipGeo, darkAccentMat);
+    visorLipMesh.position.set(0, 0.1, -0.18);
+    this.cameraHead.add(visorLipMesh);
 
-    // Dark Glass Optical Camera Lens Element
-    const lensGeo = new THREE.CircleGeometry(0.065, 24);
-    const lensMat = new THREE.MeshStandardMaterial({ color: 0x00b7ff, roughness: 0.05, metalness: 1.0, opacity: 0.9, transparent: true });
-    const lensMesh = new THREE.Mesh(lensGeo, lensMat);
-    lensMesh.rotation.y = -Math.PI / 2;
-    lensMesh.position.set(-0.192, 0, 0);
-    this.cameraHead.add(lensMesh);
+    // Pitch Black Front Face Plate Disc
+    const facePlateGeo = new THREE.CircleGeometry(0.082, 32);
+    const pitchBlackMat = new THREE.MeshStandardMaterial({ color: 0x05080e, roughness: 0.2, metalness: 0.8 });
+    const facePlateMesh = new THREE.Mesh(facePlateGeo, pitchBlackMat);
+    facePlateMesh.rotation.y = Math.PI; // Facing -Z
+    facePlateMesh.position.set(0, 0, -0.181);
+    this.cameraHead.add(facePlateMesh);
 
-    // Glowing Red Recording LED Dot
-    const ledGeo = new THREE.SphereGeometry(0.018, 12, 12);
+    // Dark Metallic Outer Bezel Ring Rim
+    const bezelRingGeo = new THREE.RingGeometry(0.045, 0.082, 32);
+    const bezelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1, metalness: 0.9 });
+    const bezelRingMesh = new THREE.Mesh(bezelRingGeo, bezelMat);
+    bezelRingMesh.rotation.y = Math.PI;
+    bezelRingMesh.position.set(0, 0, -0.183);
+    this.cameraHead.add(bezelRingMesh);
+
+    // Central Deep Black Camera Lens Pupil
+    const lensPupilGeo = new THREE.CircleGeometry(0.042, 32);
+    const lensPupilMat = new THREE.MeshStandardMaterial({
+      color: 0x000b14,
+      emissive: 0x00b7ff,
+      emissiveIntensity: 0.15,
+      roughness: 0.05,
+      metalness: 1.0
+    });
+    const lensPupilMesh = new THREE.Mesh(lensPupilGeo, lensPupilMat);
+    lensPupilMesh.rotation.y = Math.PI;
+    lensPupilMesh.position.set(0, 0, -0.185);
+    this.cameraHead.add(lensPupilMesh);
+
+    // Inner Optical Lens Reflection Glass Core
+    const glassCoreGeo = new THREE.CircleGeometry(0.02, 16);
+    const glassCoreMat = new THREE.MeshStandardMaterial({
+      color: 0x00e1ff,
+      roughness: 0.0,
+      metalness: 1.0,
+      opacity: 0.9,
+      transparent: true
+    });
+    const glassCoreMesh = new THREE.Mesh(glassCoreGeo, glassCoreMat);
+    glassCoreMesh.rotation.y = Math.PI;
+    glassCoreMesh.position.set(0, 0, -0.187);
+    this.cameraHead.add(glassCoreMesh);
+
+    // 4 Infrared (IR) Sensor Dots Around the Lens Face
+    const irGeo = new THREE.SphereGeometry(0.008, 8, 8);
+    const irMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.7 });
+
+    const irPositions = [
+      [-0.055, 0], [0.055, 0], [0, 0.055], [0, -0.055]
+    ];
+
+    irPositions.forEach(([x, y]) => {
+      const irMesh = new THREE.Mesh(irGeo, irMat);
+      irMesh.position.set(x, y, -0.184);
+      this.cameraHead.add(irMesh);
+    });
+
+    // Glowing Red Recording LED Indicator
+    const ledGeo = new THREE.SphereGeometry(0.015, 12, 12);
     const ledMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const ledMesh = new THREE.Mesh(ledGeo, ledMat);
-    ledMesh.position.set(-0.185, 0.055, 0.045);
+    ledMesh.position.set(0.045, 0.055, -0.186);
     this.cameraHead.add(ledMesh);
 
     const redLedLight = new THREE.PointLight(0xff0000, 1.2, 2.5);
-    redLedLight.position.set(-0.2, 0.055, 0.045);
+    redLedLight.position.set(0.045, 0.055, -0.2);
     this.cameraHead.add(redLedLight);
 
     this.cameraGroup.add(this.cameraHead);
     this.scene.add(this.cameraGroup);
-    this.cameraHead.rotation.set(0, 0, 0);
+    this.cameraHead.rotation.set(0.2, -Math.PI / 3, 0); // Static pose pointing down corridor
 
     // 7. DETAILED LIMINAL MANNEQUIN FIGURE WITH CHASE MECHANIC
     this.mannequinGroup = new THREE.Group();
@@ -736,7 +818,7 @@ export class Scene3D {
       this.setGraffitiText("MIND TRAP");
     }
     if (this.cameraHead) {
-      this.cameraHead.rotation.set(0, 0, 0);
+      this.cameraHead.rotation.set(0.2, -Math.PI / 3, 0);
     }
     if (this.ghostShadowMesh) this.ghostShadowMesh.visible = false;
 
@@ -794,18 +876,11 @@ export class Scene3D {
 
     // 4. PRECISE SECURITY CAMERA TRACKING ANOMALY
     if (this.enableCameraTracking && this.cameraHead && this.cameraGroup) {
-      const camWorldPos = new THREE.Vector3();
-      this.cameraHead.getWorldPosition(camWorldPos);
-
-      const dirX = this.playerPos.x - camWorldPos.x;
-      const dirY = this.playerPos.y - camWorldPos.y;
-      const dirZ = this.playerPos.z - camWorldPos.z;
-
-      const yaw = Math.atan2(dirX, dirZ);
-      const distXZ = Math.hypot(dirX, dirZ);
-      const pitch = Math.atan2(dirY, distXZ);
-
-      this.cameraHead.rotation.set(pitch, yaw - Math.PI / 2, 0, 'YXZ');
+      const localPlayerPos = this.playerPos.clone();
+      this.cameraGroup.worldToLocal(localPlayerPos);
+      this.cameraHead.lookAt(localPlayerPos);
+    } else if (this.cameraHead) {
+      this.cameraHead.rotation.set(0.2, -Math.PI / 3, 0);
     }
 
     // 5. MANNEQUIN PROXIMITY CHASE & CATCH MECHANIC
