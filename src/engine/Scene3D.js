@@ -287,6 +287,7 @@ export class Scene3D {
     const backGlassPane = new THREE.Mesh(glassPaneGeo, glassPaneMat);
     backGlassPane.position.set(0, 1.6, 11.82);
     backGlassPane.rotation.y = Math.PI;
+    backGlassPane.position.set(0, 1.6, 11.82);
     this.scene.add(backGlassPane);
 
     this.backDoorHandleMesh = new THREE.Mesh(handleGeo, handleMat);
@@ -294,12 +295,12 @@ export class Scene3D {
     this.backDoorHandleMesh.position.set(-0.5, 1.1, 11.8);
     this.scene.add(this.backDoorHandleMesh);
 
-    // Door Smear Handprint Mesh
+    // Monstrous Demon Handprint Mesh on Door Glass
     const handprintTexture = this.generateHandprintTexture();
-    const smearGeo = new THREE.PlaneGeometry(0.35, 0.35);
+    const smearGeo = new THREE.PlaneGeometry(0.58, 0.58);
     const smearMat = new THREE.MeshBasicMaterial({ map: handprintTexture, transparent: true, opacity: 0.95 });
     this.doorSmearMesh = new THREE.Mesh(smearGeo, smearMat);
-    this.doorSmearMesh.position.set(0.05, 1.6, -11.81);
+    this.doorSmearMesh.position.set(0.02, 1.58, -11.81);
     this.doorSmearMesh.visible = false;
     this.scene.add(this.doorSmearMesh);
 
@@ -574,40 +575,82 @@ export class Scene3D {
 
   generateHandprintTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = 512;
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    ctx.clearRect(0, 0, 256, 256);
-    ctx.fillStyle = '#880000';
+    ctx.clearRect(0, 0, 512, 512);
 
+    const bloodRed = '#770000';
+    const darkBlood = '#440000';
+
+    ctx.fillStyle = bloodRed;
+
+    // Massive Twisted Demon Palm Base
     ctx.beginPath();
-    ctx.ellipse(128, 145, 38, 48, -0.1, 0, Math.PI * 2);
+    ctx.ellipse(256, 310, 85, 105, -0.05, 0, Math.PI * 2);
     ctx.fill();
 
-    const drawFinger = (x, y, w, h, angle) => {
+    // Inner Darker Blood Coagulation Core
+    ctx.fillStyle = darkBlood;
+    ctx.beginPath();
+    ctx.ellipse(256, 310, 55, 70, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw Long Pointed Razor-Clawed Fingers
+    const drawMonsterClaw = (x, y, baseW, length, angle) => {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(angle);
+
+      // Finger Stem
+      ctx.fillStyle = bloodRed;
       ctx.beginPath();
-      ctx.ellipse(0, 0, w, h, 0, 0, Math.PI * 2);
+      ctx.moveTo(-baseW, 0);
+      ctx.lineTo(baseW, 0);
+      ctx.lineTo(baseW * 0.5, -length * 0.75);
+      ctx.lineTo(-baseW * 0.5, -length * 0.75);
+      ctx.closePath();
       ctx.fill();
+
+      // Sharp Pointed Razor Claw Tip
+      ctx.fillStyle = darkBlood;
+      ctx.beginPath();
+      ctx.moveTo(-baseW * 0.6, -length * 0.7);
+      ctx.lineTo(baseW * 0.6, -length * 0.7);
+      ctx.lineTo(0, -length);
+      ctx.closePath();
+      ctx.fill();
+
       ctx.restore();
     };
 
-    drawFinger(75, 120, 10, 28, -0.6);
-    drawFinger(98, 75, 11, 40, -0.2);
-    drawFinger(128, 65, 12, 44, 0);
-    drawFinger(158, 75, 11, 38, 0.2);
-    drawFinger(180, 95, 9, 30, 0.4);
+    // 6 Elongated Demon Claws
+    drawMonsterClaw(140, 260, 22, 140, -0.7);  // Far Left Thumb Claw
+    drawMonsterClaw(180, 220, 24, 180, -0.35); // Long Index Claw
+    drawMonsterClaw(230, 200, 26, 210, -0.1);  // Massive Middle Claw
+    drawMonsterClaw(280, 205, 25, 200, 0.15);  // Ring Claw
+    drawMonsterClaw(330, 225, 22, 170, 0.4);   // Pinky Claw
+    drawMonsterClaw(370, 265, 18, 130, 0.65);  // Extra 6th Mutation Claw!
 
-    ctx.strokeStyle = '#880000';
-    ctx.lineWidth = 4;
+    // Aggressive Blood Drips Running Down Below Palm
+    ctx.strokeStyle = bloodRed;
+    ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.moveTo(110, 185); ctx.lineTo(105, 230);
-    ctx.moveTo(135, 190); ctx.lineTo(138, 245);
-    ctx.moveTo(155, 180); ctx.lineTo(160, 220);
+    ctx.moveTo(210, 400); ctx.lineTo(200, 480);
+    ctx.moveTo(256, 415); ctx.lineTo(256, 510);
+    ctx.moveTo(300, 395); ctx.lineTo(310, 490);
+    ctx.moveTo(170, 380); ctx.lineTo(165, 450);
+    ctx.moveTo(340, 380); ctx.lineTo(345, 460);
     ctx.stroke();
+
+    // Droplet Dots at ends of drips
+    ctx.fillStyle = darkBlood;
+    [ [200, 485], [256, 510], [310, 495], [165, 455], [345, 465] ].forEach(([dx, dy]) => {
+      ctx.beginPath();
+      ctx.arc(dx, dy, 7, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
     return new THREE.CanvasTexture(canvas);
   }
